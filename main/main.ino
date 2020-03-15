@@ -6,13 +6,13 @@
 #include <FirebaseArduino.h>
 
 #define FIREBASE_HOST "bilmuhbot.firebaseio.com"
-#define FIREBASE_AUTH "uDCLDq4WNrwV9McjLNr1KCaTImdYvpYKNYnWNX3a"
+#define FIREBASE_AUTH ""
 #define WIFI_SSID "internetev"
-#define WIFI_PASSWORD "emre.1912"
+#define WIFI_PASSWORD ""
 
-#define ChatID  "872893196"
-#define logChatID  "872893196"
-#define BOTtoken "1141708876:AAEzVcWR0zKuGyDAFyiG2bQROV5u8u4fGxU"
+#define ChatID  ""
+#define logChatID  ""
+#define BOTtoken ""
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOTtoken, client);
 
