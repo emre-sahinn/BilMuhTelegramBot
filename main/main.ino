@@ -3,15 +3,17 @@
 #include <ESP8266HTTPClient.h>
 #include <UniversalTelegramBot.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
 #include <FirebaseArduino.h>
 
+ESP8266WiFiMulti WiFiMulti;
 #define FIREBASE_HOST "bilmuhbot.firebaseio.com"
 #define FIREBASE_AUTH ""
 #define WIFI_SSID "internetev"
 #define WIFI_PASSWORD ""
 
-#define ChatID  ""
-#define logChatID  ""
+#define ChatID  "-1001126227417"// -226141867  872893196
+#define logChatID  "872893196"
 #define BOTtoken ""
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOTtoken, client);
@@ -27,12 +29,13 @@ String msg = "emre sahin";
 
 void setup() {
   Serial.begin(115200);
+  Serial.setTimeout(2000);
   client.setInsecure();
-  WiFi.mode(WIFI_OFF);
   delay(1000);
   WiFi.mode(WIFI_STA);
   // connect to wifi.
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  WiFiMulti.addAP("internetev", "");
   Serial.print("connecting");
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
@@ -43,69 +46,69 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+
+  blink(2);
 }
 
 void loop() {
-
+  String payload = "";
   //client.setFingerprint("BB DC 45 2A 07 E3 4A 71 33 40 32 DA BE 81 F7 72 6F 4A 2B 6B");
   Serial.print("bot durum:"); Serial.println(bot.sendMessage(logChatID, "OK..", ""));
   //client.setFingerprint(fingerprint);
-  int8_t r = 0; //retry counter
-  while ((!client.connect(host, httpsPort)) && (r < 30)) {
-    delay(100);
-    //Serial.print(".");
-    r++;
+
+
+  if ((WiFiMulti.run() == WL_CONNECTED)) {
+
+    std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
+    client->setFingerprint(fingerprint);
+
+    HTTPClient https;
+
+    Serial.print("[HTTPS] begin...\n");
+    //link: https://api.thingspeak.com/apps/thinghttp/send_request?api_key=45F1HRSG176JVCSF
+    //test link: https://api.thingspeak.com/apps/thinghttp/send_request?api_key=AGK10O9MPFY48XCS
+    if (https.begin(*client, "https://api.thingspeak.com/apps/thinghttp/send_request?api_key=45F1HRSG176JVCSF")) {  // HTTPS
+
+      Serial.print("[HTTPS] GET...\n");
+      // start connection and send HTTP header
+      int httpCode = https.GET();
+
+      // httpCode will be negative on error
+      if (httpCode > 0) {
+        // HTTP header has been send and Server response header has been handled
+        Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
+
+        // file found at server
+        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+          payload = https.getString();
+          //Serial.println(payload);
+        }
+      } else {
+        Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
+      }
+
+      https.end();
+    } else {
+      Serial.printf("[HTTPS] Unable to connect\n");
+    }
+
   }
 
-  client.print(String("GET ") + "/apps/thinghttp/send_request?api_key=AGK10O9MPFY48XCS" + " HTTP/1.1\r\n" +
-               "Host: " + host + "\r\n" +
-               "Connection: close\r\n\r\n");
-  delay(1000);
-  String line;
+  //String parse operations
   int firstIndex = -1;
   int lastIndex = -1;
-  firstIndex = line.indexOf('<', firstIndex + 1);
-  lastIndex = line.indexOf('>', lastIndex + 1);
-
-  for (uint8_t i; i < 20; i++) {
-    line = client.readStringUntil('\n');  //Read Line by Line
-    //Serial.print(i); Serial.println(line); //Print response
-  }
-
-  //msg_1
   for (int i = 0; i < 2; i++) {
-    firstIndex = line.indexOf('<', firstIndex + 1);
+    firstIndex = payload.indexOf('<', firstIndex + 1);
   }
-  for (int i = 0; i < 1; i++) {
-    lastIndex = line.indexOf('>', lastIndex + 1);
-  }
-  msg = line.substring(lastIndex + 1, firstIndex);
+  lastIndex = payload.indexOf('>', lastIndex + 1);
+  msg = payload.substring(lastIndex + 1, firstIndex);
 
-  Serial.println("***");
-  Serial.println(msg);
-  Serial.println("***");
-  //Convert special characters
-  msg.replace("Ç", "C");
-  msg.replace("İ", "I");
-  msg.replace("Ü", "U");
-  msg.replace("Ğ", "G");
-  msg.replace("Ö", "O");
-  msg.replace("Ş", "S");
-  msg.replace("ı", "i");
-  msg.replace("ç", "c");
-  msg.replace("ü", "u");
-  msg.replace("ğ", "g");
-  msg.replace("ö", "o");
-  msg.replace("ş", "s");
-  msg.replace("⸮", " ");
-  /////////////////////
-  Serial.println(msg);
-  String f_data = Firebase.getString("Duyuru1");
-  Serial.println("???");
+  String f_data = Firebase.getString("Duyuru1");//Fetch data from database
+  Serial.println("---");
   Serial.println(f_data);
   Serial.println(msg);
   Serial.println(f_data != msg);
-  Serial.println("???");
+  Serial.println("---");
   if (f_data != "" && msg != "" && f_data != msg) {
     Serial.println(f_data);
     Firebase.setString("Duyuru1", msg);
@@ -114,9 +117,32 @@ void loop() {
       bot.sendMessage(logChatID, Firebase.error(), "");
     }
     delay(3000);
-    Serial.print("bot durum msg:"); Serial.println(bot.sendMessage(ChatID, msg + " duyurusu yayinlanmistir. Ayrıntısını görmek için https://bilmuh.ege.edu.tr/ adresine bakınız.", ""));
-    delay(3000);
+    Serial.print("bot durum msg:"); Serial.println(bot.sendMessage(ChatID, msg + " duyurusu yayınlanmıştır. Ayrıntısını görmek için https://bilmuh.ege.edu.tr/ adresine bakınız.", ""));
   }
+  delay (100);
+  WiFi.disconnect();
+  Serial.println("sleeping");
+  delay (100);
+  WiFi.mode (WIFI_OFF);
+  WiFi.forceSleepBegin();
+  delay (100);
+  blink(3);
+  delay (100);
+  ESP.deepSleep(3600 * 1000000UL, WAKE_RF_DEFAULT); //sleep 3600 x 10^6 micro seconds
+  //delay(300000);
+}
 
-  delay(300000);
+void blink(int n) {
+  static bool first_time = true;
+  if (first_time == true) {
+    pinMode(LED_BUILTIN, OUTPUT);
+    first_time = false;
+  }
+  digitalWrite(LED_BUILTIN, HIGH);
+  for (int i = 0; i < n; ++i) {
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(500);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(500);
+  }
 }
