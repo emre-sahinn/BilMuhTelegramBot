@@ -7,7 +7,7 @@
 #include <FirebaseArduino.h>
 
 ESP8266WiFiMulti WiFiMulti;
-#define FIREBASE_HOST "bilmuhbot.firebaseio.com"
+#define FIREBASE_HOST ""
 #define FIREBASE_AUTH ""
 #define WIFI_SSID "internetev"
 #define WIFI_PASSWORD ""
