@@ -12,8 +12,8 @@ ESP8266WiFiMulti WiFiMulti;
 #define WIFI_SSID "internetev"
 #define WIFI_PASSWORD ""
 
-#define ChatID  "-1001126227417"// -226141867  872893196
-#define logChatID  "872893196"
+#define ChatID  ""
+#define logChatID  ""
 #define BOTtoken ""
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOTtoken, client);
@@ -65,9 +65,8 @@ void loop() {
     HTTPClient https;
 
     Serial.print("[HTTPS] begin...\n");
-    //link: https://api.thingspeak.com/apps/thinghttp/send_request?api_key=45F1HRSG176JVCSF
-    //test link: https://api.thingspeak.com/apps/thinghttp/send_request?api_key=AGK10O9MPFY48XCS
-    if (https.begin(*client, "https://api.thingspeak.com/apps/thinghttp/send_request?api_key=45F1HRSG176JVCSF")) {  // HTTPS
+    
+    if (https.begin(*client, "DO NOT TRY TO HACK.com")) {  // HTTPS
 
       Serial.print("[HTTPS] GET...\n");
       // start connection and send HTTP header
