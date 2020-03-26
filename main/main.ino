@@ -9,7 +9,7 @@
 ESP8266WiFiMulti WiFiMulti;
 #define FIREBASE_HOST ""
 #define FIREBASE_AUTH ""
-#define WIFI_SSID "internetev"
+#define WIFI_SSID ""
 #define WIFI_PASSWORD ""
 
 #define ChatID  ""
@@ -20,7 +20,7 @@ UniversalTelegramBot bot(BOTtoken, client);
 
 //String test_photo_url = "https://www.arduino.cc/en/uploads/Trademark/ArduinoCommunityLogo.png";
 
-const char *host = "api.thingspeak.com";
+const char *host = "";
 const int httpsPort = 443;  //HTTPS= 443 and HTTP = 80
 
 const char fingerprint[] PROGMEM = "F9 C2 65 6C F9 Ef 7F 66 8B F7 35 FE 15 EA 82 9F 5F 55 54 3E";
@@ -35,7 +35,7 @@ void setup() {
   WiFi.mode(WIFI_STA);
   // connect to wifi.
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  WiFiMulti.addAP("internetev", "");
+  WiFiMulti.addAP("internetev", "emre.1912");
   Serial.print("connecting");
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
@@ -65,8 +65,8 @@ void loop() {
     HTTPClient https;
 
     Serial.print("[HTTPS] begin...\n");
-    
-    if (https.begin(*client, "DO NOT TRY TO HACK.com")) {  // HTTPS
+    //test link: https://api.thingspeak.com/apps/thinghttp/send_request?api_key=AGK10O9MPFY48XCS
+    if (https.begin(*client, "")) {  // HTTPS
 
       Serial.print("[HTTPS] GET...\n");
       // start connection and send HTTP header
@@ -108,7 +108,7 @@ void loop() {
   Serial.println(msg);
   Serial.println(f_data != msg);
   Serial.println("---");
-  if (f_data != "" && msg != "" && f_data != msg) {
+  if (f_data != "" && msg != "" && f_data != msg && firstIndex != -1 && lastIndex != -1 && msg.length() > 3 && msg != "Error parsing document, try a different parse string." && payload != "Error parsing document, try a different parse string." && payload != "Retry later" && msg != "0" && msg != "-1" && msg != "-2") {
     Serial.println(f_data);
     Firebase.setString("Duyuru1", msg);
     if (Firebase.failed()) {
@@ -117,7 +117,9 @@ void loop() {
     }
     delay(3000);
     Serial.print("bot durum msg:"); Serial.println(bot.sendMessage(ChatID, msg + " duyurusu yayınlanmıştır. Ayrıntısını görmek için https://bilmuh.ege.edu.tr/ adresine bakınız.", ""));
-  }
+  }//else{
+  //Serial.print("bot compare msg:"); Serial.println(bot.sendMessage(logChatID, msg + " || " + f_data, ""));
+  //}
   delay (100);
   WiFi.disconnect();
   Serial.println("sleeping");
@@ -128,7 +130,6 @@ void loop() {
   blink(3);
   delay (100);
   ESP.deepSleep(3600 * 1000000UL, WAKE_RF_DEFAULT); //sleep 3600 x 10^6 micro seconds
-  //delay(300000);
 }
 
 void blink(int n) {
