@@ -34,11 +34,11 @@ That's all! While you are sleeping, ESP8266 will work at 1-hour intervals.<br>
 
 ### Prerequisites :pencil:
 
-1 x Breadboard
-1 x Jumper Cable
-1 x 5V 2A adaptor
-1 x ESP8266
-1 x USB Cable (to upload the code)
+1 x Breadboard <br>
+1 x Jumper Cable <br>
+1 x 5V 2A adaptor <br>
+1 x ESP8266 <br>
+1 x USB Cable (to upload the code) <br>
 2 x Heatsink (Optional)
 
 ## Built With 🎇
